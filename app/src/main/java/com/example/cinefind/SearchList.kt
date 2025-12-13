@@ -5,6 +5,9 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -25,22 +28,16 @@ import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
 
-// ---------------- ACTIVITY ----------------
-
 class SearchList : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-
-        val movieName = intent.getStringExtra("movie_name") ?: ""
-
         setContent {
+            val movieName = intent.getStringExtra("movie_name") ?: ""
             SearchListView(movieName)
         }
     }
 }
-
-// ---------------- COMPOSABLE ----------------
 
 @Composable
 fun SearchListView(movieName: String) {
@@ -70,16 +67,7 @@ fun SearchListView(movieName: String) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
     ) {
-
-        Text(
-            text = "Searching for: $movieName",
-            fontSize = 20.sp,
-            fontFamily = FontFamily.Monospace,
-            modifier = Modifier.padding(bottom = 16.dp)
-        )
-
         if (loading) {
             Box(
                 modifier = Modifier.fillMaxSize(),
@@ -89,8 +77,7 @@ fun SearchListView(movieName: String) {
             }
         } else {
             LazyColumn {
-                items(movies) { movie ->
-                    MovieItem(movie) {
+                items(movies) { movie -> MovieItem(movie) {
                         val intent = Intent(context, MovieDetail::class.java)
                         intent.putExtra("imdb_id", movie.imdbId)
                         context.startActivity(intent)
@@ -101,8 +88,6 @@ fun SearchListView(movieName: String) {
     }
 }
 
-// ---------------- MOVIE ITEM ----------------
-
 @Composable
 fun MovieItem(movie: Movie, onClick: () -> Unit) {
     Column(
@@ -110,20 +95,23 @@ fun MovieItem(movie: Movie, onClick: () -> Unit) {
             .fillMaxWidth()
             .clickable { onClick() }
             .padding(vertical = 12.dp)
+            .border(BorderStroke(2.dp, color = Color.Black))
+            .background(color = Color.Yellow),
     ) {
         Text(
             text = movie.title,
             fontSize = 18.sp,
+            modifier = Modifier.padding(5.dp)
 
-        )
+            )
         Text(
             text = "Year: ${movie.year ?: "N/A"}",
             fontSize = 14.sp,
+            modifier = Modifier.padding(5.dp)
+
         )
     }
 }
-
-// ---------------- DATA MODELS ----------------
 
 data class MovieResponse(
     val description: List<Movie>

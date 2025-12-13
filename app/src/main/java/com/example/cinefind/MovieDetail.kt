@@ -24,10 +24,8 @@ class MovieDetail : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-
-        val imdbId = intent.getStringExtra("imdb_id") ?: ""
-
         setContent {
+            val imdbId = intent.getStringExtra("imdb_id") ?: ""
             MovieDetailView(imdbId)
         }
     }
@@ -84,8 +82,6 @@ fun MovieDetailUI(movie: MovieDetailResponse) {
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-
-        // Movie Poster
         AsyncImage(
             model = movie.short?.image,
             contentDescription = "Movie Poster",
@@ -93,35 +89,23 @@ fun MovieDetailUI(movie: MovieDetailResponse) {
                 .height(300.dp)
                 .fillMaxWidth()
         )
-
         Spacer(modifier = Modifier.height(16.dp))
-
-        // Movie Name
         Text(
             text = movie.short?.name ?: "N/A",
             fontSize = 26.sp
         )
-
         Spacer(modifier = Modifier.height(8.dp))
-
-        // Release Date
         Text(
             text = "Release Date: ${movie.short?.datePublished ?: "N/A"}",
             fontSize = 14.sp
         )
-
         Spacer(modifier = Modifier.height(12.dp))
-
-        // Description
         Text(
             text = movie.short?.description ?: "No description available",
             fontSize = 16.sp
         )
     }
 }
-
-
-/* ---------- DATA MODELS (SAME FILE) ---------- */
 
 data class MovieDetailResponse(
     val short: ShortMovie?
@@ -133,4 +117,3 @@ data class ShortMovie(
     val description: String?,
     val datePublished: String?
 )
-
