@@ -4,11 +4,22 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AssistChip
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Divider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.gson.Gson
@@ -76,36 +87,89 @@ fun MovieDetailView(imdbId: String) {
 
 @Composable
 fun MovieDetailUI(movie: MovieDetailResponse) {
+    val scrollState = rememberScrollState()
+
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+            .verticalScroll(scrollState)
+            .background(MaterialTheme.colorScheme.background)
+            .padding(top = 80.dp)
     ) {
-        AsyncImage(
-            model = movie.short?.image,
-            contentDescription = "Movie Poster",
+        Box(
             modifier = Modifier
-                .height(300.dp)
+                .fillMaxWidth(),
+            contentAlignment = Alignment.Center
+        ) {
+            Card(
+                shape = RoundedCornerShape(16.dp),
+                elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+            ) {
+                AsyncImage(
+                    model = movie.short?.image,
+                    contentDescription = "Movie Poster",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .width(220.dp)
+                        .height(320.dp)
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // Content Card
+        Card(
+            modifier = Modifier
                 .fillMaxWidth()
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        Text(
-            text = movie.short?.name ?: "N/A",
-            fontSize = 26.sp
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        Text(
-            text = "Release Date: ${movie.short?.datePublished ?: "N/A"}",
-            fontSize = 14.sp
-        )
-        Spacer(modifier = Modifier.height(12.dp))
-        Text(
-            text = movie.short?.description ?: "No description available",
-            fontSize = 16.sp
-        )
+                .padding(horizontal = 16.dp, vertical = 10.dp),
+            shape = RoundedCornerShape(24.dp),
+            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+        ) {
+            Column(
+                modifier = Modifier.padding(20.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+
+                // Movie Name
+                Text(
+                    text = movie.short?.name ?: "N/A",
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold
+                )
+
+                // Release Date
+                AssistChip(
+                    onClick = {},
+                    label = {
+                        Text(
+                            text = movie.short?.datePublished ?: "Unknown Release Date"
+                        )
+                    }
+                )
+
+                Divider()
+
+                // Overview
+                Text(
+                    text = "Overview",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold
+                )
+
+                Text(
+                    text = movie.short?.description ?: "No description available.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    lineHeight = 22.sp
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
     }
 }
+
+
 
 data class MovieDetailResponse(
     val short: ShortMovie?

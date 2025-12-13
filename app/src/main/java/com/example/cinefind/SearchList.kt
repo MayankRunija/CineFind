@@ -5,20 +5,21 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.gson.Gson
@@ -68,12 +69,23 @@ fun SearchListView(movieName: String) {
         modifier = Modifier
             .fillMaxSize()
     ) {
+        Text(
+            text = "Showing results for $movieName",
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 50.dp, bottom = 16.dp),
+            textAlign = TextAlign.Center,
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.primary
+        )
+
         if (loading) {
             Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
-                Text("Loading...")
+                Text("Loading...", fontSize = 20.sp)
             }
         } else {
             LazyColumn {
@@ -89,29 +101,37 @@ fun SearchListView(movieName: String) {
 }
 
 @Composable
-fun MovieItem(movie: Movie, onClick: () -> Unit) {
-    Column(
+fun MovieItem(
+    movie: Movie,
+    onClick: () -> Unit
+) {
+    Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onClick() }
-            .padding(vertical = 12.dp)
-            .border(BorderStroke(2.dp, color = Color.Black))
-            .background(color = Color.Yellow),
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .clickable { onClick() },
+        shape = RoundedCornerShape(12.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
-        Text(
-            text = movie.title,
-            fontSize = 18.sp,
-            modifier = Modifier.padding(5.dp)
-
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            Text(
+                text = movie.title,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold
             )
-        Text(
-            text = "Year: ${movie.year ?: "N/A"}",
-            fontSize = 14.sp,
-            modifier = Modifier.padding(5.dp)
 
-        )
+            Text(
+                text = "Year • ${movie.year ?: "N/A"}",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
     }
 }
+
 
 data class MovieResponse(
     val description: List<Movie>
