@@ -11,12 +11,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -26,14 +22,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import okhttp3.OkHttpClient
-import okhttp3.Request
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.http.GET
+import retrofit2.http.Query
+
+/* -------------------- ACTIVITY -------------------- */
 
 class SearchList : ComponentActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -44,6 +42,8 @@ class SearchList : ComponentActivity() {
     }
 }
 
+/* -------------------- COMPOSABLE -------------------- */
+
 @Composable
 fun SearchListView(movieName: String) {
 
@@ -53,39 +53,33 @@ fun SearchListView(movieName: String) {
     var error by remember { mutableStateOf(false) }
 
     val gradient = Brush.verticalGradient(
-        colors = listOf(Color(0xFF0D0D0D), Color(0xFF1C1C1C), Color(0xFF3A3A3A))
+        colors = listOf(
+            Color(0xFF0D0D0D),
+            Color(0xFF1C1C1C),
+            Color(0xFF3A3A3A)
+        )
     )
 
     LaunchedEffect(movieName) {
-        val json = withContext(Dispatchers.IO) {
-            try {
-                val client = OkHttpClient()
-                val request = Request.Builder()
-                    .url("https://imdb.iamidiotareyoutoo.com/search?q=$movieName")
-                    .build()
+        loading = true
+        error = false
 
-                client.newCall(request).execute().body?.string()
-            } catch (e: Exception) {
-                null
-            }
-        }
-
-        if (json != null) {
-            val result = Gson().fromJson(json, MovieResponse::class.java)
+        try {
+            val result = RetrofitInstance.api.searchMovies(movieName)
             movies = result.description
-        } else {
+        } catch (e: Exception) {
             error = true
+        } finally {
+            loading = false
         }
-
-        loading = false
     }
-
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(gradient)
     ) {
+
         Text(
             text = "Showing results for $movieName",
             modifier = Modifier
@@ -98,36 +92,42 @@ fun SearchListView(movieName: String) {
         )
 
         when {
-
-            loading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center){
+            loading -> Box(
+                Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
                 Text("Loading...", fontSize = 20.sp, color = Color.White)
             }
-            error ->  Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center){
+
+            error -> Box(
+                Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
                 Text("Failed to load movie", fontSize = 18.sp, color = Color.Red)
             }
+
             else -> LazyColumn {
-                    items(movies) { movie -> MovieItem(movie) {
+                items(movies) { movie ->
+                    MovieItem(movie) {
                         val intent = Intent(context, MovieDetail::class.java)
                         intent.putExtra("imdb_id", movie.imdbId)
                         context.startActivity(intent)
                     }
-                    }
                 }
-
+            }
         }
     }
 }
 
+/* -------------------- UI ITEM -------------------- */
+
 @Composable
-fun MovieItem(
-    movie: Movie,
-    onClick: () -> Unit
-) {
+fun MovieItem(movie: Movie, onClick: () -> Unit) {
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 8.dp)
-            .padding(bottom = 10.dp)
             .clickable { onClick() },
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
@@ -137,9 +137,9 @@ fun MovieItem(
                 .fillMaxWidth()
                 .background(Color(0xFFFFC107))
                 .padding(16.dp),
-
             verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
+
             Text(
                 text = movie.title,
                 style = MaterialTheme.typography.titleMedium,
@@ -155,6 +155,7 @@ fun MovieItem(
     }
 }
 
+/* -------------------- DATA MODELS -------------------- */
 
 data class MovieResponse(
     val description: List<Movie>
@@ -163,5 +164,5 @@ data class MovieResponse(
 data class Movie(
     @SerializedName("#TITLE") val title: String,
     @SerializedName("#YEAR") val year: Int?,
-    @SerializedName("#IMDB_ID") val imdbId: String,
+    @SerializedName("#IMDB_ID") val imdbId: String
 )

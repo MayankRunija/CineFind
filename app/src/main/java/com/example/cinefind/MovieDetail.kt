@@ -9,13 +9,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Divider
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -24,12 +20,13 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.google.gson.Gson
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import okhttp3.OkHttpClient
-import okhttp3.Request
 import coil.compose.AsyncImage
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.http.GET
+import retrofit2.http.Query
+
+/* -------------------- ACTIVITY -------------------- */
 
 
 class MovieDetail : ComponentActivity() {
@@ -44,38 +41,39 @@ class MovieDetail : ComponentActivity() {
     }
 }
 
+/* -------------------- COMPOSABLE -------------------- */
+
 @Composable
 fun MovieDetailView(imdbId: String) {
 
     var movie by remember { mutableStateOf<MovieDetailResponse?>(null) }
     var loading by remember { mutableStateOf(true) }
     var error by remember { mutableStateOf(false) }
+
     val gradient = Brush.verticalGradient(
-        colors = listOf(Color(0xFF0D0D0D), Color(0xFF1C1C1C), Color(0xFF3A3A3A))
+        colors = listOf(
+            Color(0xFF0D0D0D),
+            Color(0xFF1C1C1C),
+            Color(0xFF3A3A3A)
+        )
     )
 
     LaunchedEffect(imdbId) {
-        val json = withContext(Dispatchers.IO) {
-            try {
-                val client = OkHttpClient()
-                val request = Request.Builder()
-                    .url("https://imdb.iamidiotareyoutoo.com/search?tt=$imdbId")
-                    .build()
-                client.newCall(request).execute().body?.string()
-            } catch (e: Exception) {
-                null
-            }
-        }
-        if (json != null) {
-            movie = Gson().fromJson(json, MovieDetailResponse::class.java)
-        } else {
+        loading = true
+        error = false
+
+        try {
+            movie = RetrofitInstance.api.getMovieDetail(imdbId)
+        } catch (e: Exception) {
             error = true
+        } finally {
+            loading = false
         }
-        loading = false
     }
 
     Box(
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier
+            .fillMaxSize()
             .background(gradient),
         contentAlignment = Alignment.Center
     ) {
@@ -87,8 +85,11 @@ fun MovieDetailView(imdbId: String) {
     }
 }
 
+/* -------------------- UI -------------------- */
+
 @Composable
 fun MovieDetailUI(movie: MovieDetailResponse) {
+
     val scrollState = rememberScrollState()
 
     Column(
@@ -97,9 +98,9 @@ fun MovieDetailUI(movie: MovieDetailResponse) {
             .verticalScroll(scrollState)
             .padding(top = 80.dp)
     ) {
+
         Box(
-            modifier = Modifier
-                .fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth(),
             contentAlignment = Alignment.Center
         ) {
             Card(
@@ -107,7 +108,7 @@ fun MovieDetailUI(movie: MovieDetailResponse) {
                 elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
             ) {
                 AsyncImage(
-                    model = movie.short?.image ?: "Poster not Available",
+                    model = movie.short?.image ?: "",
                     contentDescription = "Movie Poster",
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
@@ -116,11 +117,13 @@ fun MovieDetailUI(movie: MovieDetailResponse) {
                 )
             }
         }
+
         Spacer(modifier = Modifier.height(24.dp))
+
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 10.dp),
+                .padding(horizontal = 16.dp),
             shape = RoundedCornerShape(24.dp),
             elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
         ) {
@@ -128,7 +131,6 @@ fun MovieDetailUI(movie: MovieDetailResponse) {
                 modifier = Modifier
                     .background(Color(0xFFFFC107))
                     .padding(20.dp),
-
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 Text(
@@ -136,17 +138,21 @@ fun MovieDetailUI(movie: MovieDetailResponse) {
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold
                 )
+
                 Text(
                     text = movie.short?.datePublished ?: "Unknown Release Date",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold
                 )
+
                 Divider()
+
                 Text(
                     text = "Overview",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold
                 )
+
                 Text(
                     text = movie.short?.description ?: "No description available.",
                     style = MaterialTheme.typography.bodyMedium,
@@ -154,9 +160,12 @@ fun MovieDetailUI(movie: MovieDetailResponse) {
                 )
             }
         }
+
         Spacer(modifier = Modifier.height(24.dp))
     }
 }
+
+/* -------------------- DATA MODELS -------------------- */
 
 data class MovieDetailResponse(
     val short: ShortMovie?
