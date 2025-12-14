@@ -47,9 +47,9 @@ class MovieDetail : ComponentActivity() {
 @Composable
 fun MovieDetailView(imdbId: String) {
 
-    var movie by rememberSaveable { mutableStateOf<MovieDetailResponse?>(null) }
-    var loading by rememberSaveable { mutableStateOf(true) }
-    var error by rememberSaveable { mutableStateOf(false) }
+    var movie by remember { mutableStateOf<MovieDetailResponse?>(null) }
+    var loading by remember { mutableStateOf(true) }
+    var error by remember { mutableStateOf(false) }
     val gradient = Brush.verticalGradient(
         colors = listOf(Color(0xFF0D0D0D), Color(0xFF1C1C1C), Color(0xFF3A3A3A))
     )
