@@ -2,6 +2,7 @@ package com.example.cinefind
 
 import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -97,9 +98,13 @@ fun WelcomeScreen() {
 
             Button(
                 onClick = {
-                    val intent = Intent(context, SearchList::class.java)
-                    intent.putExtra("movie_name", search)
-                    context.startActivity(intent)
+                    if (search.isBlank()) {
+                        Toast.makeText(context, "Please Enter a value", Toast.LENGTH_SHORT).show()
+                    } else {
+                        val intent = Intent(context, SearchList::class.java)
+                        context.startActivity(intent)
+                        intent.putExtra("movie_name", search)
+                    }
                 },
                 modifier = Modifier
                     .fillMaxWidth(0.6f)

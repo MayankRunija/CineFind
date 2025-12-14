@@ -5,6 +5,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -17,6 +18,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -46,6 +49,9 @@ fun SearchListView(movieName: String) {
     val context = LocalContext.current
     var movies by remember { mutableStateOf<List<Movie>>(emptyList()) }
     var loading by remember { mutableStateOf(true) }
+    val gradient = Brush.verticalGradient(
+        colors = listOf(Color(0xFF0D0D0D), Color(0xFF1C1C1C), Color(0xFF3A3A3A))
+    )
 
     LaunchedEffect(movieName) {
         val client = OkHttpClient()
@@ -68,6 +74,7 @@ fun SearchListView(movieName: String) {
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(gradient)
     ) {
         Text(
             text = "Showing results for $movieName",
@@ -85,7 +92,7 @@ fun SearchListView(movieName: String) {
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
-                Text("Loading...", fontSize = 20.sp)
+                Text("Loading...", fontSize = 20.sp, color = Color.White)
             }
         } else {
             LazyColumn {
@@ -109,12 +116,17 @@ fun MovieItem(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 8.dp)
+            .padding(bottom = 10.dp)
             .clickable { onClick() },
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column(
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+            .background(Color(0xFFFFC107))
+            .padding(16.dp),
+
             verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             Text(
