@@ -15,6 +15,7 @@ import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -46,9 +47,9 @@ class MovieDetail : ComponentActivity() {
 @Composable
 fun MovieDetailView(imdbId: String) {
 
-    var movie by remember { mutableStateOf<MovieDetailResponse?>(null) }
-    var loading by remember { mutableStateOf(true) }
-    var error by remember { mutableStateOf(false) }
+    var movie by rememberSaveable { mutableStateOf<MovieDetailResponse?>(null) }
+    var loading by rememberSaveable { mutableStateOf(true) }
+    var error by rememberSaveable { mutableStateOf(false) }
     val gradient = Brush.verticalGradient(
         colors = listOf(Color(0xFF0D0D0D), Color(0xFF1C1C1C), Color(0xFF3A3A3A))
     )
