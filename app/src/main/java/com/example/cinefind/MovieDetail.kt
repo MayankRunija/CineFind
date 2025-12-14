@@ -15,7 +15,6 @@ import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -30,6 +29,7 @@ import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import coil.compose.AsyncImage
+import com.google.gson.annotations.SerializedName
 
 
 class MovieDetail : ComponentActivity() {
@@ -59,7 +59,7 @@ fun MovieDetailView(imdbId: String) {
             try {
                 val client = OkHttpClient()
                 val request = Request.Builder()
-                    .url("https://imdb.iamidiotareyoutoo.com/search?tt=$imdbId")
+                    .url("https://www.omdbapi.com/?i=$imdbId&apikey=3530cde3")
                     .build()
                 client.newCall(request).execute().body?.string()
             } catch (e: Exception) {
@@ -81,7 +81,7 @@ fun MovieDetailView(imdbId: String) {
     ) {
         when {
             loading -> Text("Loading...", fontSize = 20.sp, color = Color.White)
-            error -> Text("Failed to load movie", fontSize = 18.sp, color = Color.White)
+            error -> Text("Failed to load movie", fontSize = 18.sp, color = Color.Red)
             movie != null -> MovieDetailUI(movie!!)
         }
     }
@@ -89,15 +89,6 @@ fun MovieDetailView(imdbId: String) {
 
 @Composable
 fun MovieDetailUI(movie: MovieDetailResponse) {
-
-//    val movie = MovieDetailResponse(
-//        short = ShortMovie(
-//            name = "The Shawshank Redemption",
-//            image = "https://upload.wikimedia.org/wikipedia/en/8/81/ShawshankRedemptionMoviePoster.jpg",
-//            description = "Two imprisoned men bond over a number of years, finding solace and eventual redemption through acts of common decency.",
-//            datePublished = "1994-09-23"
-//        )
-//    )
 
     val scrollState = rememberScrollState()
 
@@ -107,9 +98,9 @@ fun MovieDetailUI(movie: MovieDetailResponse) {
             .verticalScroll(scrollState)
             .padding(top = 80.dp)
     ) {
+
         Box(
-            modifier = Modifier
-                .fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth(),
             contentAlignment = Alignment.Center
         ) {
             Card(
@@ -117,7 +108,7 @@ fun MovieDetailUI(movie: MovieDetailResponse) {
                 elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
             ) {
                 AsyncImage(
-                    model = movie.short?.image ?: "Poster not Available",
+                    model = movie.poster,
                     contentDescription = "Movie Poster",
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
@@ -126,11 +117,13 @@ fun MovieDetailUI(movie: MovieDetailResponse) {
                 )
             }
         }
+
         Spacer(modifier = Modifier.height(24.dp))
+
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 10.dp),
+                .padding(horizontal = 16.dp),
             shape = RoundedCornerShape(24.dp),
             elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
         ) {
@@ -138,43 +131,72 @@ fun MovieDetailUI(movie: MovieDetailResponse) {
                 modifier = Modifier
                     .background(Color(0xFFFFC107))
                     .padding(20.dp),
-
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
+
                 Text(
-                    text = movie.short?.name ?: "N/A",
+                    text = movie.title ?: "N/A",
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold
                 )
+
                 Text(
-                    text = movie.short?.datePublished ?: "Unknown Release Date",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold
+                    text = "Released: ${movie.released ?: "Unknown"}",
+                    style = MaterialTheme.typography.titleMedium
                 )
+
                 Divider()
+
                 Text(
                     text = "Overview",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold
                 )
+
                 Text(
-                    text = movie.short?.description ?: "No description available.",
+                    text = movie.plot ?: "No description available",
                     style = MaterialTheme.typography.bodyMedium,
                     lineHeight = 22.sp
                 )
+
+                Divider()
+
+                Text(text = "IMDb Rating: ${movie.imdbRating ?: "N/A"}",fontWeight = FontWeight.SemiBold)
+                Text(text = "Genre: ${movie.genre ?: "N/A"}",fontWeight = FontWeight.SemiBold)
+                Text(text = "Director: ${movie.director ?: "N/A"}",fontWeight = FontWeight.SemiBold)
+                Text(text = "Actors: ${movie.actors ?: "N/A"}",fontWeight = FontWeight.SemiBold)
             }
         }
-        Spacer(modifier = Modifier.height(24.dp))
     }
 }
 
-data class MovieDetailResponse(
-    val short: ShortMovie?
-)
 
-data class ShortMovie(
-    val name: String?,
-    val image: String?,
-    val description: String?,
-    val datePublished: String?
+data class MovieDetailResponse(
+
+    @SerializedName("Title")
+    val title: String?,
+
+    @SerializedName("Year")
+    val year: String?,
+
+    @SerializedName("Released")
+    val released: String?,
+
+    @SerializedName("Plot")
+    val plot: String?,
+
+    @SerializedName("Poster")
+    val poster: String?,
+
+    @SerializedName("Genre")
+    val genre: String?,
+
+    @SerializedName("Director")
+    val director: String?,
+
+    @SerializedName("Actors")
+    val actors: String?,
+
+    @SerializedName("imdbRating")
+    val imdbRating: String?
 )

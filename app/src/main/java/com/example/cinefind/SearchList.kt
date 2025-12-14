@@ -68,7 +68,7 @@ fun SearchListView(movieName: String) {
             try {
                 val client = OkHttpClient()
                 val request = Request.Builder()
-                    .url("https://imdb.iamidiotareyoutoo.com/search?q=$movieName")
+                    .url("https://www.omdbapi.com/?apikey=3530cde3&s=$movieName&page=1")
                     .build()
                 client.newCall(request).execute().body?.string()
             } catch (e: Exception) {
@@ -78,7 +78,7 @@ fun SearchListView(movieName: String) {
 
         if (json != null) {
             val result = Gson().fromJson(json, MovieResponse::class.java)
-            movies = result.description
+            movies = result.search
         } else {
             error = true
         }
@@ -161,11 +161,14 @@ fun MovieItem(movie: Movie, onClick: () -> Unit) {
 
 
 data class MovieResponse(
-    val description: List<Movie>
+    @SerializedName("Search") val search: List<Movie> = emptyList(),
+    @SerializedName("totalResults") val totalResults: String? = null,
+
 )
 
 data class Movie(
-    @SerializedName("#TITLE") val title: String,
-    @SerializedName("#YEAR") val year: Int?,
-    @SerializedName("#IMDB_ID") val imdbId: String,
+    @SerializedName("Title") val title: String,
+    @SerializedName("Year") val year: String,
+    @SerializedName("imdbID") val imdbId: String,
+
 )
