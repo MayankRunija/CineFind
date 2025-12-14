@@ -81,7 +81,7 @@ fun MovieDetailView(imdbId: String) {
     ) {
         when {
             loading -> Text("Loading...", fontSize = 20.sp, color = Color.White)
-            error -> Text("Failed to load movie", fontSize = 18.sp, color = Color.Red)
+            error -> Text("Movies not found !!", fontSize = 18.sp, color = Color.Red)
             movie != null -> MovieDetailUI(movie!!)
         }
     }
