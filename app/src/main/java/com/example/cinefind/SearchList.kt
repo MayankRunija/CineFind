@@ -58,7 +58,6 @@ fun SearchListView(movieName: String) {
         colors = listOf(Color(0xFF0D0D0D), Color(0xFF1C1C1C), Color(0xFF3A3A3A))
     )
 
-    // Initial load
     LaunchedEffect(movieName) {
         loading = true
         page = 1
@@ -75,7 +74,6 @@ fun SearchListView(movieName: String) {
         loading = false
     }
 
-    // Scroll-based pagination
     LaunchedEffect(listState) {
         while (true) {
             val lastVisibleItem = listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
@@ -95,7 +93,7 @@ fun SearchListView(movieName: String) {
                 }
                 isLoadingMore = false
             }
-            delay(200) // Small delay to prevent busy looping
+            delay(200)
         }
     }
 
