@@ -126,8 +126,8 @@ fun MovieDetailUI(movie: MovieDetailResponse) {
         ) {
             Column(
                 modifier = Modifier
-                .background(Color(0xFFFFC107))
-                .padding(20.dp),
+                    .background(Color(0xFFFFC107))
+                    .padding(20.dp),
 
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {

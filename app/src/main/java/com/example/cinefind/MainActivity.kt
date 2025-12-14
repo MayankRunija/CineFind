@@ -102,6 +102,7 @@ fun WelcomeScreen() {
                         Toast.makeText(context, "Please Enter a value", Toast.LENGTH_SHORT).show()
                     } else {
                         val intent = Intent(context, SearchList::class.java)
+                        intent.putExtra("movie_name", search)
                         context.startActivity(intent)
                         intent.putExtra("movie_name", search)
                     }

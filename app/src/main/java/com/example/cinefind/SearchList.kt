@@ -37,8 +37,8 @@ class SearchList : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        val movieName = intent.getStringExtra("movie_name") ?: ""
         setContent {
-            val movieName = intent.getStringExtra("movie_name") ?: ""
             SearchListView(movieName)
         }
     }
@@ -98,10 +98,10 @@ fun SearchListView(movieName: String) {
         } else {
             LazyColumn {
                 items(movies) { movie -> MovieItem(movie) {
-                        val intent = Intent(context, MovieDetail::class.java)
-                        intent.putExtra("imdb_id", movie.imdbId)
-                        context.startActivity(intent)
-                    }
+                    val intent = Intent(context, MovieDetail::class.java)
+                    intent.putExtra("imdb_id", movie.imdbId)
+                    context.startActivity(intent)
+                }
                 }
             }
         }
@@ -125,8 +125,8 @@ fun MovieItem(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-            .background(Color(0xFFFFC107))
-            .padding(16.dp),
+                .background(Color(0xFFFFC107))
+                .padding(16.dp),
 
             verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
