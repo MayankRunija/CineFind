@@ -50,27 +50,36 @@ fun SearchListView(movieName: String) {
     val context = LocalContext.current
     var movies by remember { mutableStateOf<List<Movie>>(emptyList()) }
     var loading by remember { mutableStateOf(true) }
+    var error by remember { mutableStateOf(false) }
+
     val gradient = Brush.verticalGradient(
         colors = listOf(Color(0xFF0D0D0D), Color(0xFF1C1C1C), Color(0xFF3A3A3A))
     )
 
     LaunchedEffect(movieName) {
-        val client = OkHttpClient()
-        val request = Request.Builder()
-            .url("https://imdb.iamidiotareyoutoo.com/search?q=$movieName")
-            .build()
+        val json = withContext(Dispatchers.IO) {
+            try {
+                val client = OkHttpClient()
+                val request = Request.Builder()
+                    .url("https://imdb.iamidiotareyoutoo.com/search?q=$movieName")
+                    .build()
 
-        withContext(Dispatchers.IO) {
-            val response = client.newCall(request).execute()
-            val json = response.body?.string()
-
-            json?.let {
-                val result = Gson().fromJson(it, MovieResponse::class.java)
-                movies = result.description
-                loading = false
+                client.newCall(request).execute().body?.string()
+            } catch (e: Exception) {
+                null
             }
         }
+
+        if (json != null) {
+            val result = Gson().fromJson(json, MovieResponse::class.java)
+            movies = result.description
+        } else {
+            error = true
+        }
+
+        loading = false
     }
+
 
     Column(
         modifier = Modifier
@@ -88,22 +97,23 @@ fun SearchListView(movieName: String) {
             color = MaterialTheme.colorScheme.primary
         )
 
-        if (loading) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
+        when {
+
+            loading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center){
                 Text("Loading...", fontSize = 20.sp, color = Color.White)
             }
-        } else {
-            LazyColumn {
-                items(movies) { movie -> MovieItem(movie) {
-                    val intent = Intent(context, MovieDetail::class.java)
-                    intent.putExtra("imdb_id", movie.imdbId)
-                    context.startActivity(intent)
-                }
-                }
+            error ->  Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center){
+                Text("Failed to load movie", fontSize = 18.sp, color = Color.Red)
             }
+            else -> LazyColumn {
+                    items(movies) { movie -> MovieItem(movie) {
+                        val intent = Intent(context, MovieDetail::class.java)
+                        intent.putExtra("imdb_id", movie.imdbId)
+                        context.startActivity(intent)
+                    }
+                    }
+                }
+
         }
     }
 }
